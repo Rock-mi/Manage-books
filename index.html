@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图书管理</title>
+    <style>
+        * {
+            margin: 0;
+        }
+        #box {
+            height: 400px;
+            width: 700px;
+            margin: 20px auto;
+            text-align: center;
+        }
+        .line1 {
+            background-color: #eedcac;
+        }
+        table tr td {
+            /* height: 25px; */
+            padding: 5px 15px;
+            border: 1px dashed #eedcac;
+        }
+        table caption {
+            margin-bottom: 15px;
+        }
+        .col {
+            width: 40px;
+        }
+        .nav td {
+            padding: 5px;
+        }
+        .shuxian {
+            display: inline-block;
+            height: 20px;
+            width: 2px;
+            vertical-align: bottom;
+            border-left: 2px solid #a393b4;
+        }
+        input {
+            outline: none;
+        }
+        a {
+            color: #a393b4;
+            text-decoration-line: underline;
+        }
+    </style>
+</head>
+<body>
+    <div id="box">
+        
+        <table cellspacing="0" cellpadding="10">
+            <caption>
+                <h1>图书管理</h1>
+            </caption>
+            <tr class="line1 nav">
+                <td colspan="4">
+                    <span>
+                        编号:
+                        <input type="text" v-model="number" :disabled="mark" v-focus>
+                        名称:
+                        <input type="text" v-model="name">
+                        <button @click="handle" :disabled="flag">提交</button>
+                    </span>
+                </td>
+            </tr>
+            <tr class="line1 nav">
+                <td colspan="4">
+                    <span>图书总数:</span>
+                    <span v-text="total"></span>
+                </td>
+            </tr>
+            <tr class="line1">
+                <th class="col">编号</th>
+                <th>名称</th>
+                <th>时间</th>
+                <th>操作</th>
+            </tr>
+            <tr :key="item.id" v-for="item in books">
+                <td class="col" v-text="item.number"></td>
+                <td v-text="item.name"></td>
+                <td v-text="item.time"></td>
+                <td>
+                    <a href="" @click.prevent="change(item.number)">修改</a>
+                    <div class="shuxian"></div>
+                    <a href="" @click.prevent="del(item.number)">删除</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script src="vue.js"></script>
+    <script>
+        Vue.directive('focus', {
+            inserted: function( el ) {
+                el.focus();
+            }
+        });
+        var vm = new Vue({
+
+            el: '#box',
+            data: {
+                flag: false,
+                mark: false,
+                books: [],
+                number: '',
+                name: ''
+            },
+            methods: {
+                handle: function () {
+
+                    if ( !this.mark ) {
+                        // console.log(this.number)
+                        var id = this.books.some(function(item){return item.number});
+                        if ( this.number == id ) {
+                            id += this.number;
+                            alert('此编号已存在，请重新输入编号');
+                            this.number = '';
+                            return true;
+                        }else {
+                            var date = new Date();
+                            var obj = {};
+                            obj.number = this.number;
+                            obj.name = this.name;
+                            obj.time = date.getFullYear() + '年' + (date.getMonth()+1) + '月' + date.getDate() + '日';
+                            this.books.push(obj);
+                        }
+
+                    }else {
+                        this.books.some( (item) => {
+                            if ( item.number == this.number ) {
+                                item.name = this.name;
+                                return true;
+                            }
+                        });
+                        this.mark = false;
+                        
+                    }
+                    this.number = '';
+                    this.name = '';
+                    
+                },
+                change: function ( val ) {
+                    
+                        this.mark = true;
+                        var book = this.books.filter(function ( item ) {
+                            return item.number == val;
+                        });
+                        // console.log(book)
+                        this.number = book[0].number;
+                        this.name = book[0].name;
+                    
+                },
+                del: function ( id ) {
+                    // var index = this.books.findIndex(function(item){
+                    //     return item.number == id;
+                    // });
+                    // // console.log(index)
+                    // this.books.splice(index,1);
+
+                    // 方法2
+                    this.books = this.books.filter(function(item){
+                        return item.number != id;
+                    })
+                }
+            },
+            computed: {
+                total: function(  ) {
+                    return this.books.length;
+                }
+            },
+            watch: {
+                name: function( val ) {
+                    var id = this.books.some(function(item){
+                        return item.name == val;
+                    });
+                    if ( id ) {
+                        this.flag = true;
+                    }else {
+                        this.flag = false;
+                    }
+                }
+            },
+            
+            // 生命周期(进行数据处理)
+            mounted: function () {
+                var data = [{
+                        number: 1,
+                        name: '红楼梦',
+                        time: '2000年7月20日'
+                    },
+                    {
+                        number: 2,
+                        name: '西游记',
+                        time: '2008年4月2日'
+                    },
+                    {
+                        number: 3,
+                        name: '许浒传',
+                        time: '2017年2月23日'
+                    }];
+                this.books = data;   
+            }
+        });
+
+
+
+
+
+
+
+    </script>
+</body>
+</html>
